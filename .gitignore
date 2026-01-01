@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+backend/venv/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.hypothesis/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Models
+models/*.h5
+models/*.tflite
+backend/models/*.h5
+backend/models/*.tflite
+!models/.gitkeep
+
+# Datasets (large files)
+datasets/
+*.csv
+*.zip
+backend/datasets/*.csv
+backend/datasets/*.zip
+!backend/datasets/README.md
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flutter/Dart
+mobile_app/.dart_tool/
+mobile_app/.flutter-plugins
+mobile_app/.flutter-plugins-dependencies
+mobile_app/.packages
+mobile_app/build/
+mobile_app/ios/Pods/
+mobile_app/ios/.symlinks/
+mobile_app/android/.gradle/
+mobile_app/android/app/build/
+
+# Kiro (optional - remove if you want to include)
+# .kiro/
