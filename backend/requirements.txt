@@ -25,3 +25,7 @@ tqdm==4.66.1
 
 # Security and Privacy
 cryptography==41.0.7
+
+# HTTP Server (for Flutter integration testing)
+flask==2.3.3
+flask-cors==4.0.0
