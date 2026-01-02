@@ -47,7 +47,7 @@ class HTTPDetectionService:
         # Try to load CNN model, fallback to feature-based
         try:
             self.cnn_model = CNNDrowsinessClassifier()
-            model_path = os.path.join(os.path.dirname(__file__), '..', 'models', 'cnn_drowsiness_model.h5')
+            model_path = os.path.join(os.path.dirname(__file__), '..', 'models', 'cnn_drowsiness.h5')
             if os.path.exists(model_path):
                 self.cnn_model.load_model(model_path)
                 self.use_cnn = True
@@ -55,7 +55,7 @@ class HTTPDetectionService:
             else:
                 self.use_cnn = False
                 self.feature_model = FeatureBasedClassifier()
-                print("⚠ CNN model not found, using feature-based classifier")
+                print(f"⚠ CNN model not found at {model_path}, using feature-based classifier")
         except Exception as e:
             self.use_cnn = False
             self.feature_model = FeatureBasedClassifier()

@@ -280,7 +280,8 @@ class CNNDrowsinessClassifier(MLModel):
     def convert_to_tflite(
         self,
         save_path: str,
-        quantize: bool = True
+        quantize: bool = True,
+        representative_data: Optional[np.ndarray] = None
     ) -> bool:
         """
         Convert the Keras model to TensorFlow Lite format.
@@ -288,6 +289,7 @@ class CNNDrowsinessClassifier(MLModel):
         Args:
             save_path: Path to save the .tflite model
             quantize: Whether to apply INT8 quantization
+            representative_data: Sample data for quantization calibration
             
         Returns:
             True if conversion was successful, False otherwise
@@ -304,8 +306,8 @@ class CNNDrowsinessClassifier(MLModel):
             converter = tf.lite.TFLiteConverter.from_keras_model(self.model)
             
             if quantize:
+                # Use dynamic range quantization (works well, no calibration needed)
                 converter.optimizations = [tf.lite.Optimize.DEFAULT]
-                converter.target_spec.supported_types = [tf.int8]
             
             tflite_model = converter.convert()
             

@@ -21,10 +21,11 @@ def train_cnn_model(
     dataset_root: str = "datasets",
     model_save_path: str = "models/cnn_drowsiness.h5",
     tflite_save_path: str = "models/cnn_drowsiness.tflite",
-    input_size: tuple = (224, 224),
+    input_size: tuple = (128, 128),
     epochs: int = 50,
     batch_size: int = 32,
-    quantize: bool = True
+    quantize: bool = True,
+    max_images_per_class: int = 5000  # Limit images to avoid memory issues
 ):
     """
     Train CNN model for drowsiness detection.
@@ -37,26 +38,31 @@ def train_cnn_model(
         epochs: Number of training epochs
         batch_size: Batch size for training
         quantize: Whether to quantize TFLite model
+        max_images_per_class: Maximum images per class to avoid memory issues
     """
     print("=" * 80)
     print("CNN Drowsiness Classifier Training")
     print("=" * 80)
     
-    # Load datasets
-    print("\n1. Loading datasets...")
+    # Load datasets with memory limit
+    print("\n1. Loading datasets (limited to avoid memory issues)...")
+    print(f"   Max images per class: {max_images_per_class}")
     loader = DatasetLoader(dataset_root)
     
     try:
-        images, labels, paths = loader.load_all_datasets(image_size=input_size)
+        images, labels, paths = loader.load_all_datasets_limited(
+            image_size=input_size,
+            max_per_class=max_images_per_class
+        )
     except ValueError as e:
         print(f"Error: {e}")
         print(f"\nPlease ensure datasets are placed in '{dataset_root}/' directory")
         print("Expected structure:")
         print(f"  {dataset_root}/")
-        print("    dataset1/")
-        print("      alert/")
-        print("      drowsy/")
-        print("    dataset2/")
+        print("    DDD/")
+        print("      alert/ or Non Drowsy/")
+        print("      drowsy/ or Drowsy/")
+        print("    NTHUDDD/")
         print("      ...")
         return
     
@@ -127,7 +133,13 @@ def train_cnn_model(
     
     # Convert to TFLite
     print(f"\n7. Converting to TensorFlow Lite format...")
-    classifier.convert_to_tflite(tflite_save_path, quantize=quantize)
+    # Use a subset of training data for quantization calibration
+    representative_data = X_train[:100] if len(X_train) >= 100 else X_train
+    classifier.convert_to_tflite(
+        tflite_save_path, 
+        quantize=quantize,
+        representative_data=representative_data
+    )
     
     print("\n" + "=" * 80)
     print("Training Complete!")
@@ -163,7 +175,7 @@ if __name__ == "__main__":
         "--input-size",
         type=int,
         nargs=2,
-        default=[224, 224],
+        default=[128, 128],
         help="Input image size (width height)"
     )
     parser.add_argument(
