@@ -133,7 +133,14 @@ class HTTPDetectionService:
             
             # Get ML score
             if self.use_cnn:
-                ml_score = self.cnn_model.predict(face_img)
+                # Resize face image to model input size (224x224)
+                import cv2
+                face_resized = cv2.resize(face_img, (224, 224))
+                # Normalize to [0, 1]
+                face_normalized = face_resized.astype(np.float32) / 255.0
+                # Get prediction (returns probability of drowsy class)
+                ml_score_raw = self.cnn_model.predict(face_normalized)
+                ml_score = float(ml_score_raw.squeeze())
             else:
                 features = np.array([[ear, mar]])
                 ml_score = self.feature_model.predict(features)
