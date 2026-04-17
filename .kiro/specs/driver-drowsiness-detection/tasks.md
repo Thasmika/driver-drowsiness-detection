@@ -220,20 +220,20 @@ This implementation plan breaks down the Driver Drowsiness Detection system into
     - **Property 25: One-touch Activation**
     - **Validates: Requirements 4.2, 4.5, 10.1**
 
-- [ ] 12. Implement system robustness and adaptation features
-  - [ ] 12.1 Add lighting condition adaptation
+- [x] 12. Implement system robustness and adaptation features
+  - [x] 12.1 Add lighting condition adaptation
     - Implement automatic camera adjustment for varying lighting
     - Add lighting condition detection and model parameter adjustment
     - Implement face re-detection after occlusion events
     - _Requirements: 1.4, 1.5, 8.1_
 
-  - [ ] 12.2 Implement cross-demographic adaptation
+  - [x] 12.2 Implement cross-demographic adaptation
     - Add demographic-aware model selection and calibration
     - Implement head pose robustness across different orientations
     - Add environmental noise adaptation for alert systems
     - _Requirements: 8.2, 8.3, 8.4_
 
-  - [ ] 12.3 Write property tests for robustness features
+  - [x] 12.3 Write property tests for robustness features
     - **Property 7: Lighting Adaptation Accuracy**
     - **Property 18: Face Re-detection After Occlusion**
     - **Property 19: Cross-demographic Adaptability**
