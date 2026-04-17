@@ -67,114 +67,96 @@ class HTTPDetectionService:
         print("✓ Service initialized successfully")
     
     def process_frame(self, image_data):
-        """Process a frame and return detection results"""
+        """Process a frame and return detection results using CNN directly."""
         try:
+            import cv2
+
             # Decode image
             if isinstance(image_data, str):
-                # Remove data URL prefix if present
                 if 'base64,' in image_data:
                     image_data = image_data.split('base64,')[1]
-                
                 image_bytes = base64.b64decode(image_data)
                 image = Image.open(BytesIO(image_bytes))
                 frame = np.array(image)
             else:
                 frame = image_data
-            
-            # Convert RGB to BGR if needed
+
+            # Ensure BGR format
             if len(frame.shape) == 3 and frame.shape[2] == 3:
-                frame = frame[:, :, ::-1]
-            
+                frame_bgr = frame[:, :, ::-1].copy()
+            else:
+                frame_bgr = frame.copy()
+
             # Detect face
-            face_result = self.face_detector.detectFace(frame)
-            if not face_result['success']:
+            face_result = self.face_detector.detectFace(frame_bgr)
+            if not face_result.face_detected or face_result.bounding_box is None:
                 return {
                     'success': False,
                     'face_detected': False,
                     'message': 'No face detected',
                     'drowsiness_score': 0.0,
-                    'confidence': 0.0
+                    'confidence': 0.0,
+                    'alert_level': 'none',
+                    'alert_message': ''
                 }
-            
-            # Extract landmarks
-            landmarks = self.landmark_detector.detectLandmarks(frame)
-            if landmarks is None:
-                return {
-                    'success': False,
-                    'face_detected': True,
-                    'message': 'Could not extract landmarks',
-                    'drowsiness_score': 0.0,
-                    'confidence': 0.0
-                }
-            
-            # Calculate features
-            ear = self.ear_calculator.calculateEAR(landmarks)
-            mar = self.mar_calculator.calculateMAR(landmarks)
-            
-            # Get ML prediction
-            face_bbox = face_result['bbox']
-            x1, y1, x2, y2 = face_bbox
-            
-            # Ensure bbox is within bounds
-            h, w = frame.shape[:2]
-            x1, y1 = max(0, x1), max(0, y1)
-            x2, y2 = min(w, x2), min(h, y2)
-            
+
+            # Crop face
+            bx, by, bw, bh = face_result.bounding_box
+            h, w = frame_bgr.shape[:2]
+            x1 = max(0, bx)
+            y1 = max(0, by)
+            x2 = min(w, bx + bw)
+            y2 = min(h, by + bh)
+
             if x2 <= x1 or y2 <= y1:
                 return {
                     'success': False,
                     'face_detected': True,
-                    'message': 'Invalid face bounding box',
+                    'message': 'Invalid bounding box',
                     'drowsiness_score': 0.0,
-                    'confidence': 0.0
+                    'confidence': 0.0,
+                    'alert_level': 'none',
+                    'alert_message': ''
                 }
-            
-            face_img = frame[y1:y2, x1:x2]
-            
-            # Get ML score
-            if self.use_cnn:
-                # Resize face image to model input size (224x224)
-                import cv2
-                face_resized = cv2.resize(face_img, (224, 224))
-                # Normalize to [0, 1]
-                face_normalized = face_resized.astype(np.float32) / 255.0
-                # Get prediction (returns probability of drowsy class)
-                ml_score_raw = self.cnn_model.predict(face_normalized)
-                ml_score = float(ml_score_raw.squeeze())
+
+            face_img = frame_bgr[y1:y2, x1:x2]
+
+            # Run CNN prediction directly on face image
+            face_resized = cv2.resize(face_img, (128, 128))
+            face_normalized = face_resized.astype(np.float32) / 255.0
+            face_input = np.expand_dims(face_normalized, axis=0)  # (1, 128, 128, 3)
+
+            ml_score_raw = self.cnn_model.model.predict(face_input, verbose=0)
+            ml_score = float(ml_score_raw.squeeze())
+
+            # Drowsiness score IS the CNN output (0=alert, 1=drowsy)
+            drowsiness_score = ml_score
+
+            # Alert levels
+            if drowsiness_score >= 0.8:
+                alert_level = 'critical'
+                alert_message = 'CRITICAL - Pull over immediately!'
+            elif drowsiness_score >= 0.5:
+                alert_level = 'warning'
+                alert_message = 'Warning - Signs of drowsiness detected'
             else:
-                features = np.array([[ear, mar]])
-                ml_score = self.feature_model.predict(features)
-            
-            # Decision engine
-            drowsiness_score = self.decision_engine.calculate_drowsiness_score(
-                ear=ear,
-                mar=mar,
-                ml_score=ml_score
-            )
-            
-            # Check for alerts
-            alert = self.alert_manager.check_alert(drowsiness_score)
-            
-            # Convert landmarks to list
-            landmarks_list = []
-            if landmarks is not None:
-                for point in landmarks:
-                    landmarks_list.append([int(point[0]), int(point[1])])
-            
+                alert_level = 'normal'
+                alert_message = 'Normal - Driving safe'
+
             return {
                 'success': True,
                 'face_detected': True,
                 'drowsiness_score': float(drowsiness_score),
-                'confidence': float(ml_score),
-                'ear': float(ear),
-                'mar': float(mar),
-                'alert_level': alert['level'],
-                'alert_message': alert['message'],
+                'confidence': float(face_result.confidence),
+                'ear': 0.0,
+                'mar': 0.0,
+                'alert_level': alert_level,
+                'alert_message': alert_message,
                 'face_bbox': [int(x1), int(y1), int(x2), int(y2)],
-                'landmarks': landmarks_list,
-                'model_type': 'cnn' if self.use_cnn else 'feature_based'
+                'landmarks': [],
+                'model_type': 'cnn'
             }
-            
+
         except Exception as e:
             import traceback
             traceback.print_exc()
@@ -183,7 +165,9 @@ class HTTPDetectionService:
                 'face_detected': False,
                 'error': str(e),
                 'drowsiness_score': 0.0,
-                'confidence': 0.0
+                'confidence': 0.0,
+                'alert_level': 'none',
+                'alert_message': ''
             }
 
 

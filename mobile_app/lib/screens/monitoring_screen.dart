@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:camera/camera.dart';
 import '../providers/drowsiness_provider.dart';
 import '../services/camera_service.dart';
 import '../services/backend_service.dart';
 import '../widgets/camera_preview_widget.dart';
-import 'dart:async';
 
 /// Monitoring screen with camera preview and real-time detection
 /// 
@@ -26,7 +27,6 @@ class _MonitoringScreenState extends State<MonitoringScreen> {
   String _errorMessage = '';
   
   Map<String, dynamic>? _detectionData;
-  Timer? _processingTimer;
   
   @override
   void initState() {
@@ -82,68 +82,68 @@ class _MonitoringScreenState extends State<MonitoringScreen> {
     });
   }
   
+  bool _isProcessing = false;
+  DateTime _lastProcessTime = DateTime.now();
+
   void _startSimulatedProcessing() {
-    // Simulate frame processing every 100ms
-    _processingTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      if (!mounted) {
-        timer.cancel();
+    // Start real camera image stream and send to backend
+    _cameraService.startImageStream((CameraImage image) async {
+      if (!mounted) return;
+
+      // Throttle to 1 frame per second to avoid overwhelming the backend
+      final now = DateTime.now();
+      if (_isProcessing || now.difference(_lastProcessTime).inMilliseconds < 1000) {
         return;
       }
-      
-      // Simulate detection data (in production, this comes from backend)
-      final simulatedData = _generateSimulatedData();
-      
-      setState(() {
-        _detectionData = simulatedData;
-      });
-      
-      // Update provider
-      final provider = context.read<DrowsinessProvider>();
-      provider.updateDrowsinessScore(
-        simulatedData['drowsiness_score'],
-        simulatedData['confidence'],
-      );
-      provider.updateFaceDetection(simulatedData['face_detected']);
-      provider.updatePerformanceMetrics(
-        simulatedData['fps'],
-        simulatedData['latency_ms'],
-      );
+      _isProcessing = true;
+      _lastProcessTime = now;
+
+      try {
+        debugPrint('Sending frame to backend...');
+        final result = await _backendService.processFrame(image);
+        debugPrint('Backend result: $result');
+
+        if (!mounted) return;
+
+        setState(() {
+          _detectionData = result;
+        });
+
+        final provider = context.read<DrowsinessProvider>();
+        final score = (result['drowsiness_score'] as num?)?.toDouble() ?? 0.0;
+        final conf  = (result['confidence'] as num?)?.toDouble() ?? 0.0;
+        provider.updateDrowsinessScore(score, conf);
+        provider.updateFaceDetection(result['face_detected'] == true);
+        provider.updatePerformanceMetrics(1.0, 1000.0);
+
+        // Show alert if critical
+        if (score >= 0.8 && mounted) {
+          _showDrowsinessAlert();
+        }
+      } catch (e) {
+        debugPrint('Frame processing error: $e');
+      } finally {
+        _isProcessing = false;
+      }
+    }).catchError((e) {
+      debugPrint('Image stream error: $e');
     });
   }
-  
-  Map<String, dynamic> _generateSimulatedData() {
-    // Simulate varying drowsiness levels
-    final time = DateTime.now().millisecondsSinceEpoch / 1000;
-    final drowsinessScore = (0.3 + 0.3 * (time % 10) / 10).clamp(0.0, 1.0);
-    
-    return {
-      'face_detected': true,
-      'drowsiness_score': drowsinessScore,
-      'confidence': 0.85,
-      'fps': 15.0,
-      'latency_ms': 45.0,
-      'face_bounds': {
-        'x': 0.2,
-        'y': 0.2,
-        'width': 0.6,
-        'height': 0.6,
-      },
-      'landmarks': {
-        'left_eye': [
-          {'x': 0.35, 'y': 0.4},
-          {'x': 0.38, 'y': 0.4},
-        ],
-        'right_eye': [
-          {'x': 0.62, 'y': 0.4},
-          {'x': 0.65, 'y': 0.4},
-        ],
-      },
-    };
+
+  void _showDrowsinessAlert() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('DROWSINESS DETECTED! Please pull over!',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 3),
+      ),
+    );
   }
 
   @override
   void dispose() {
-    _processingTimer?.cancel();
+    _cameraService.stopImageStream();
     _cameraService.dispose();
     _backendService.dispose();
     context.read<DrowsinessProvider>().stopMonitoring();
