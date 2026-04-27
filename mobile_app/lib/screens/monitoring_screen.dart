@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:camera/camera.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../providers/drowsiness_provider.dart';
 import '../services/camera_service.dart';
 import '../services/backend_service.dart';
@@ -21,6 +23,7 @@ class MonitoringScreen extends StatefulWidget {
 class _MonitoringScreenState extends State<MonitoringScreen> {
   final CameraService _cameraService = CameraService();
   final BackendService _backendService = BackendService();
+  final AudioPlayer _audioPlayer = AudioPlayer();
   
   bool _isInitializing = true;
   bool _hasPermission = false;
@@ -131,10 +134,15 @@ class _MonitoringScreenState extends State<MonitoringScreen> {
   }
 
   void _showDrowsinessAlert() {
+    // Play beep sound
+    _audioPlayer.play(AssetSource('sounds/alert_beep.wav'));
+    // Vibrate
+    HapticFeedback.heavyImpact();
+    // Show snackbar
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('DROWSINESS DETECTED! Please pull over!',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         backgroundColor: Colors.red,
         duration: Duration(seconds: 3),
       ),
@@ -146,6 +154,7 @@ class _MonitoringScreenState extends State<MonitoringScreen> {
     _cameraService.stopImageStream();
     _cameraService.dispose();
     _backendService.dispose();
+    _audioPlayer.dispose();
     context.read<DrowsinessProvider>().stopMonitoring();
     super.dispose();
   }
