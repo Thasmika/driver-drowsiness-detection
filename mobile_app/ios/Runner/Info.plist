@@ -47,5 +47,9 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access to monitor driver drowsiness and ensure safe driving.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs location access to display your current driving location and for emergency services.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app needs location access to display your current driving location and for emergency services.</string>
 </dict>
 </plist>

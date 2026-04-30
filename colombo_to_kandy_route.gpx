@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Driver Drowsiness Detection - Route Simulator"
+     xmlns="http://www.topografix.com/GPX/1/1"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+  
+  <metadata>
+    <name>Colombo to Kandy Drive</name>
+    <desc>Simulated driving route from Colombo to Kandy, Sri Lanka via A1 Highway</desc>
+    <author>
+      <name>Drowsiness Detection System</name>
+    </author>
+    <time>2026-04-30T08:00:00Z</time>
+  </metadata>
+
+  <trk>
+    <name>Colombo to Kandy Route</name>
+    <desc>Main highway route with realistic waypoints</desc>
+    <trkseg>
+      <!-- Starting Point: Colombo Fort -->
+      <trkpt lat="6.9271" lon="79.8612">
+        <ele>5</ele>
+        <time>2026-04-30T08:00:00Z</time>
+        <name>Colombo Fort - Start</name>
+      </trkpt>
+      
+      <!-- Colombo City -->
+      <trkpt lat="6.9319" lon="79.8478">
+        <ele>7</ele>
+        <time>2026-04-30T08:05:00Z</time>
+        <name>Colombo City Center</name>
+      </trkpt>
+      
+      <!-- Leaving Colombo -->
+      <trkpt lat="6.9497" lon="79.8608">
+        <ele>10</ele>
+        <time>2026-04-30T08:10:00Z</time>
+        <name>Maradana</name>
+      </trkpt>
+      
+      <trkpt lat="6.9787" lon="79.8816">
+        <ele>12</ele>
+        <time>2026-04-30T08:15:00Z</time>
+        <name>Peliyagoda</name>
+      </trkpt>
+      
+      <!-- Entering Highway -->
+      <trkpt lat="7.0089" lon="79.9045">
+        <ele>15</ele>
+        <time>2026-04-30T08:20:00Z</time>
+        <name>Kelaniya</name>
+      </trkpt>
+      
+      <trkpt lat="7.0456" lon="79.9234">
+        <ele>18</ele>
+        <time>2026-04-30T08:25:00Z</time>
+        <name>Kadawatha</name>
+      </trkpt>
+      
+      <trkpt lat="7.0823" lon="79.9512">
+        <ele>22</ele>
+        <time>2026-04-30T08:30:00Z</time>
+        <name>Ragama</name>
+      </trkpt>
+      
+      <!-- A1 Highway -->
+      <trkpt lat="7.1234" lon="79.9789">
+        <ele>28</ele>
+        <time>2026-04-30T08:35:00Z</time>
+        <name>Gampaha</name>
+      </trkpt>
+      
+      <trkpt lat="7.1567" lon="80.0123">
+        <ele>35</ele>
+        <time>2026-04-30T08:40:00Z</time>
+        <name>Yakkala</name>
+      </trkpt>
+      
+      <trkpt lat="7.1889" lon="80.0456">
+        <ele>42</ele>
+        <time>2026-04-30T08:45:00Z</time>
+        <name>Nittambuwa</name>
+      </trkpt>
+      
+      <trkpt lat="7.2234" lon="80.0789">
+        <ele>55</ele>
+        <time>2026-04-30T08:50:00Z</time>
+        <name>Warakapola Junction</name>
+      </trkpt>
+      
+      <!-- Climbing towards Kandy -->
+      <trkpt lat="7.2567" lon="80.1234">
+        <ele>75</ele>
+        <time>2026-04-30T08:55:00Z</time>
+        <name>Polgahawela</name>
+      </trkpt>
+      
+      <trkpt lat="7.2889" lon="80.1789">
+        <ele>95</ele>
+        <time>2026-04-30T09:00:00Z</time>
+        <name>Kurunegala Road</name>
+      </trkpt>
+      
+      <trkpt lat="7.3123" lon="80.2345">
+        <ele>125</ele>
+        <time>2026-04-30T09:05:00Z</time>
+        <name>Ambepussa</name>
+      </trkpt>
+      
+      <trkpt lat="7.3456" lon="80.2901">
+        <ele>155</ele>
+        <time>2026-04-30T09:10:00Z</time>
+        <name>Kegalle</name>
+      </trkpt>
+      
+      <trkpt lat="7.3789" lon="80.3456">
+        <ele>195</ele>
+        <time>2026-04-30T09:15:00Z</time>
+        <name>Mawanella</name>
+      </trkpt>
+      
+      <!-- Hill Country -->
+      <trkpt lat="7.4012" lon="80.4012">
+        <ele>245</ele>
+        <time>2026-04-30T09:20:00Z</time>
+        <name>Kadugannawa</name>
+      </trkpt>
+      
+      <trkpt lat="7.4234" lon="80.4567">
+        <ele>305</ele>
+        <time>2026-04-30T09:25:00Z</time>
+        <name>Peradeniya Road</name>
+      </trkpt>
+      
+      <trkpt lat="7.2567" lon="80.5678">
+        <ele>385</ele>
+        <time>2026-04-30T09:30:00Z</time>
+        <name>Peradeniya</name>
+      </trkpt>
+      
+      <trkpt lat="7.2789" lon="80.5989">
+        <ele>425</ele>
+        <time>2026-04-30T09:35:00Z</time>
+        <name>Kandy Outskirts</name>
+      </trkpt>
+      
+      <!-- Destination: Kandy -->
+      <trkpt lat="7.2906" lon="80.6337">
+        <ele>465</ele>
+        <time>2026-04-30T09:40:00Z</time>
+        <name>Kandy City - Destination</name>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Driver Drowsiness Detection - Route Simulator"
+     xmlns="http://www.topografix.com/GPX/1/1"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+  
+  <metadata>
+    <name>Colombo City Drive</name>
+    <desc>Short urban driving route around Colombo city center</desc>
+    <author>
+      <name>Drowsiness Detection System</name>
+    </author>
+    <time>2026-04-30T08:00:00Z</time>
+  </metadata>
+
+  <trk>
+    <name>Colombo City Route</name>
+    <desc>Quick test route through Colombo</desc>
+    <trkseg>
+      <!-- Fort Area -->
+      <trkpt lat="6.9271" lon="79.8612">
+        <ele>5</ele>
+        <time>2026-04-30T08:00:00Z</time>
+        <name>Colombo Fort</name>
+      </trkpt>
+      
+      <trkpt lat="6.9297" lon="79.8567">
+        <ele>5</ele>
+        <time>2026-04-30T08:02:00Z</time>
+        <name>Pettah</name>
+      </trkpt>
+      
+      <!-- Galle Face -->
+      <trkpt lat="6.9319" lon="79.8478">
+        <ele>3</ele>
+        <time>2026-04-30T08:04:00Z</time>
+        <name>Galle Face Green</name>
+      </trkpt>
+      
+      <trkpt lat="6.9234" lon="79.8456">
+        <ele>3</ele>
+        <time>2026-04-30T08:06:00Z</time>
+        <name>Galle Face Hotel</name>
+      </trkpt>
+      
+      <!-- Kollupitiya -->
+      <trkpt lat="6.9167" lon="79.8512">
+        <ele>4</ele>
+        <time>2026-04-30T08:08:00Z</time>
+        <name>Kollupitiya</name>
+      </trkpt>
+      
+      <trkpt lat="6.9089" lon="79.8567">
+        <ele>5</ele>
+        <time>2026-04-30T08:10:00Z</time>
+        <name>Bambalapitiya</name>
+      </trkpt>
+      
+      <!-- Wellawatte -->
+      <trkpt lat="6.8978" lon="79.8623">
+        <ele>5</ele>
+        <time>2026-04-30T08:12:00Z</time>
+        <name>Wellawatte</name>
+      </trkpt>
+      
+      <trkpt lat="6.8867" lon="79.8678">
+        <ele>6</ele>
+        <time>2026-04-30T08:14:00Z</time>
+        <name>Dehiwala</name>
+      </trkpt>
+      
+      <!-- Mount Lavinia -->
+      <trkpt lat="6.8389" lon="79.8634">
+        <ele>8</ele>
+        <time>2026-04-30T08:16:00Z</time>
+        <name>Mount Lavinia</name>
+      </trkpt>
+      
+      <!-- Return Route -->
+      <trkpt lat="6.8567" lon="79.8712">
+        <ele>7</ele>
+        <time>2026-04-30T08:18:00Z</time>
+        <name>Ratmalana</name>
+      </trkpt>
+      
+      <trkpt lat="6.8756" lon="79.8789">
+        <ele>6</ele>
+        <time>2026-04-30T08:20:00Z</time>
+        <name>Kalubowila</name>
+      </trkpt>
+      
+      <trkpt lat="6.8934" lon="79.8856">
+        <ele>8</ele>
+        <time>2026-04-30T08:22:00Z</time>
+        <name>Nugegoda</name>
+      </trkpt>
+      
+      <trkpt lat="6.9123" lon="79.8923">
+        <ele>10</ele>
+        <time>2026-04-30T08:24:00Z</time>
+        <name>Borella</name>
+      </trkpt>
+      
+      <!-- Back to Fort -->
+      <trkpt lat="6.9271" lon="79.8612">
+        <ele>5</ele>
+        <time>2026-04-30T08:26:00Z</time>
+        <name>Colombo Fort - End</name>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>

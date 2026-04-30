@@ -21,6 +21,7 @@ dependencies:
   
   # Location Services
   geolocator: ^10.1.0
+  geocoding: ^2.1.1
   
   # Local Storage
   shared_preferences: ^2.2.2
@@ -36,6 +37,9 @@ dependencies:
   
   # Audio Alert
   audioplayers: ^6.0.0
+  
+  # URL Launcher for phone calls
+  url_launcher: ^6.2.2
   
   # UI
   cupertino_icons: ^1.0.6

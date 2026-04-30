@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:camera/camera.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../providers/drowsiness_provider.dart';
 import '../services/camera_service.dart';
 import '../services/backend_service.dart';
+import '../services/location_service.dart';
 import '../widgets/camera_preview_widget.dart';
 
 /// Monitoring screen with camera preview and real-time detection
@@ -23,6 +26,7 @@ class MonitoringScreen extends StatefulWidget {
 class _MonitoringScreenState extends State<MonitoringScreen> {
   final CameraService _cameraService = CameraService();
   final BackendService _backendService = BackendService();
+  final LocationService _locationService = LocationService();
   final AudioPlayer _audioPlayer = AudioPlayer();
   
   bool _isInitializing = true;
@@ -30,6 +34,11 @@ class _MonitoringScreenState extends State<MonitoringScreen> {
   String _errorMessage = '';
   
   Map<String, dynamic>? _detectionData;
+  
+  // Location tracking
+  Position? _currentPosition;
+  String _currentAddress = 'Loading address...';
+  DateTime? _lastLocationUpdate;
   
   @override
   void initState() {
@@ -44,14 +53,27 @@ class _MonitoringScreenState extends State<MonitoringScreen> {
     });
     
     // Request camera permission
-    final status = await Permission.camera.request();
-    if (!status.isGranted) {
+    final cameraStatus = await Permission.camera.request();
+    if (!cameraStatus.isGranted) {
       setState(() {
         _isInitializing = false;
         _hasPermission = false;
         _errorMessage = 'Camera permission denied';
       });
       return;
+    }
+    
+    // Request location permission - CRITICAL FOR REAL LOCATION
+    final locationStatus = await Permission.location.request();
+    debugPrint('Location permission status: $locationStatus');
+    
+    // Check if location services are enabled
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    debugPrint('Location service enabled: $serviceEnabled');
+    
+    if (!serviceEnabled) {
+      debugPrint('WARNING: Location services are disabled!');
+      // Continue anyway, but location won't work
     }
     
     setState(() {
@@ -72,6 +94,13 @@ class _MonitoringScreenState extends State<MonitoringScreen> {
     // For now, we'll simulate backend responses
     await _backendService.initialize();
     
+    // Initialize location tracking - FORCE IMMEDIATE UPDATE
+    debugPrint('Starting location tracking...');
+    _startLocationTracking();
+    
+    // Force immediate location update
+    _forceLocationUpdate();
+    
     // Start monitoring
     if (mounted) {
       context.read<DrowsinessProvider>().startMonitoring();
@@ -85,8 +114,96 @@ class _MonitoringScreenState extends State<MonitoringScreen> {
     });
   }
   
+  // Force immediate location update
+  Future<void> _forceLocationUpdate() async {
+    debugPrint('Forcing location update...');
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        forceAndroidLocationManager: true,
+      );
+      debugPrint('Got position: ${position.latitude}, ${position.longitude}');
+      if (mounted) {
+        await _updateLocationFromPosition(position);
+      }
+    } catch (e) {
+      debugPrint('Error forcing location update: $e');
+    }
+  }
+  
   bool _isProcessing = false;
   DateTime _lastProcessTime = DateTime.now();
+
+  void _startLocationTracking() {
+    // Get initial position
+    _updateLocation();
+    
+    // Listen to position updates
+    _locationService.getPositionStream().listen((Position position) {
+      if (!mounted) return;
+      _updateLocationFromPosition(position);
+    }, onError: (error) {
+      debugPrint('Location stream error: $error');
+    });
+  }
+  
+  Future<void> _updateLocation() async {
+    try {
+      final position = await _locationService.getCurrentPosition();
+      if (position != null && mounted) {
+        _updateLocationFromPosition(position);
+      }
+    } catch (e) {
+      debugPrint('Error updating location: $e');
+    }
+  }
+  
+  Future<void> _updateLocationFromPosition(Position position) async {
+    setState(() {
+      _currentPosition = position;
+      _lastLocationUpdate = DateTime.now();
+    });
+    
+    // Get address from coordinates
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+      
+      if (placemarks.isNotEmpty && mounted) {
+        final place = placemarks.first;
+        setState(() {
+          _currentAddress = _formatAddress(place);
+        });
+      }
+    } catch (e) {
+      debugPrint('Error getting address: $e');
+      setState(() {
+        _currentAddress = 'Address unavailable';
+      });
+    }
+  }
+  
+  String _formatAddress(Placemark place) {
+    List<String> parts = [];
+    
+    if (place.street != null && place.street!.isNotEmpty) {
+      parts.add(place.street!);
+    }
+    if (place.locality != null && place.locality!.isNotEmpty) {
+      parts.add(place.locality!);
+    }
+    if (place.administrativeArea != null && place.administrativeArea!.isNotEmpty) {
+      parts.add(place.administrativeArea!);
+    }
+    if (place.country != null && place.country!.isNotEmpty) {
+      parts.add(place.country!);
+    }
+    
+    return parts.isEmpty ? 'Address unavailable' : parts.join(', ');
+  }
+
 
   void _startSimulatedProcessing() {
     // Start real camera image stream and send to backend
@@ -149,6 +266,89 @@ class _MonitoringScreenState extends State<MonitoringScreen> {
     );
   }
 
+  // Make emergency call to 119
+  Future<void> _makeEmergencyCall() async {
+    final Uri phoneUri = Uri(scheme: 'tel', path: '119');
+    
+    try {
+      if (await canLaunchUrl(phoneUri)) {
+        await launchUrl(phoneUri);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Unable to make phone call'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Show emergency confirmation dialog
+  void _showEmergencyDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: Colors.red.withOpacity(0.5),
+            width: 2,
+          ),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 32),
+            SizedBox(width: 12),
+            Text(
+              'Emergency Call',
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Do you want to call 119 Emergency Services?',
+          style: TextStyle(color: Colors.white70, fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white.withOpacity(0.7)),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _makeEmergencyCall();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text('Call 119'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _cameraService.stopImageStream();
@@ -165,6 +365,50 @@ class _MonitoringScreenState extends State<MonitoringScreen> {
       appBar: AppBar(
         title: const Text('Monitoring'),
         actions: [
+          // Emergency 119 button in AppBar
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFFFF1744),
+                  Color(0xFFD50000),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: _showEmergencyDialog,
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.phone_in_talk,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 4),
+                      const Text(
+                        '119',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.info_outline),
             onPressed: () {
@@ -230,6 +474,69 @@ class _MonitoringScreenState extends State<MonitoringScreen> {
             cameraService: _cameraService,
             showOverlay: true,
             detectionData: _detectionData,
+          ),
+        ),
+        
+        // Location display
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          color: Colors.black87,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.location_on, color: Colors.blue, size: 20),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Current Location',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (_lastLocationUpdate != null)
+                    Text(
+                      _formatLastUpdate(_lastLocationUpdate!),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              if (_currentPosition != null)
+                Text(
+                  'Lat: ${_currentPosition!.latitude.toStringAsFixed(6)}, '
+                  'Lon: ${_currentPosition!.longitude.toStringAsFixed(6)}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontFamily: 'monospace',
+                  ),
+                )
+              else
+                const Text(
+                  'Getting location...',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                  ),
+                ),
+              const SizedBox(height: 2),
+              Text(
+                _currentAddress,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
         ),
         
@@ -331,6 +638,19 @@ class _MonitoringScreenState extends State<MonitoringScreen> {
         ),
       ],
     );
+  }
+  
+  String _formatLastUpdate(DateTime time) {
+    final now = DateTime.now();
+    final difference = now.difference(time);
+    
+    if (difference.inSeconds < 60) {
+      return '${difference.inSeconds}s ago';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else {
+      return '${difference.inHours}h ago';
+    }
   }
   
   Color _getAlertColor(String status) {

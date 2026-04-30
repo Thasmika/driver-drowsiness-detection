@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.0" creator="Driver Drowsiness Detection - Route Simulator"
+     xmlns="http://www.topografix.com/GPX/1/1"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+  
+  <metadata>
+    <name>Colombo to Galle Coastal Drive</name>
+    <desc>Scenic coastal route from Colombo to Galle via Southern Expressway</desc>
+    <author>
+      <name>Drowsiness Detection System</name>
+    </author>
+    <time>2026-04-30T10:00:00Z</time>
+  </metadata>
+
+  <trk>
+    <name>Colombo to Galle Coastal Route</name>
+    <desc>Beautiful coastal highway drive</desc>
+    <trkseg>
+      <!-- Starting Point: Colombo -->
+      <trkpt lat="6.9271" lon="79.8612">
+        <ele>5</ele>
+        <time>2026-04-30T10:00:00Z</time>
+        <name>Colombo Fort - Start</name>
+      </trkpt>
+      
+      <!-- Heading South -->
+      <trkpt lat="6.8389" lon="79.8634">
+        <ele>8</ele>
+        <time>2026-04-30T10:10:00Z</time>
+        <name>Mount Lavinia</name>
+      </trkpt>
+      
+      <trkpt lat="6.7823" lon="79.8856">
+        <ele>10</ele>
+        <time>2026-04-30T10:15:00Z</time>
+        <name>Moratuwa</name>
+      </trkpt>
+      
+      <trkpt lat="6.7234" lon="79.9012">
+        <ele>12</ele>
+        <time>2026-04-30T10:20:00Z</time>
+        <name>Panadura</name>
+      </trkpt>
+      
+      <!-- Entering Expressway -->
+      <trkpt lat="6.6567" lon="79.9234">
+        <ele>15</ele>
+        <time>2026-04-30T10:25:00Z</time>
+        <name>Kalutara</name>
+      </trkpt>
+      
+      <trkpt lat="6.5889" lon="79.9567">
+        <ele>18</ele>
+        <time>2026-04-30T10:30:00Z</time>
+        <name>Beruwala</name>
+      </trkpt>
+      
+      <trkpt lat="6.5234" lon="79.9889">
+        <ele>20</ele>
+        <time>2026-04-30T10:35:00Z</time>
+        <name>Aluthgama</name>
+      </trkpt>
+      
+      <!-- Coastal Towns -->
+      <trkpt lat="6.4567" lon="80.0123">
+        <ele>22</ele>
+        <time>2026-04-30T10:40:00Z</time>
+        <name>Bentota</name>
+      </trkpt>
+      
+      <trkpt lat="6.3889" lon="80.0456">
+        <ele>25</ele>
+        <time>2026-04-30T10:45:00Z</time>
+        <name>Induruwa</name>
+      </trkpt>
+      
+      <trkpt lat="6.3234" lon="80.0789">
+        <ele>28</ele>
+        <time>2026-04-30T10:50:00Z</time>
+        <name>Kosgoda</name>
+      </trkpt>
+      
+      <trkpt lat="6.2567" lon="80.1012">
+        <ele>30</ele>
+        <time>2026-04-30T10:55:00Z</time>
+        <name>Balapitiya</name>
+      </trkpt>
+      
+      <trkpt lat="6.1889" lon="80.1234">
+        <ele>32</ele>
+        <time>2026-04-30T11:00:00Z</time>
+        <name>Ambalangoda</name>
+      </trkpt>
+      
+      <trkpt lat="6.1234" lon="80.1456">
+        <ele>35</ele>
+        <time>2026-04-30T11:05:00Z</time>
+        <name>Hikkaduwa</name>
+      </trkpt>
+      
+      <!-- Approaching Galle -->
+      <trkpt lat="6.0789" lon="80.1678">
+        <ele>38</ele>
+        <time>2026-04-30T11:10:00Z</time>
+        <name>Dodanduwa</name>
+      </trkpt>
+      
+      <trkpt lat="6.0456" lon="80.1889">
+        <ele>40</ele>
+        <time>2026-04-30T11:15:00Z</time>
+        <name>Galle Outskirts</name>
+      </trkpt>
+      
+      <!-- Destination: Galle Fort -->
+      <trkpt lat="6.0535" lon="80.2210">
+        <ele>5</ele>
+        <time>2026-04-30T11:20:00Z</time>
+        <name>Galle Fort - Destination</name>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>
